@@ -16,15 +16,30 @@
     }
   </script>
   <style>
+    :root {
+      --bg-color: #1e1e2f;
+      --text-color: #f0f0f0;
+      --accent-color: #4c8bf5;
+      --hover-color: #3a6edc;
+      --secondary-bg: #2a2a3a;
+    }
+    body.light {
+      --bg-color: #f0f0f0;
+      --text-color: #1e1e2f;
+      --accent-color: #007bff;
+      --hover-color: #0056b3;
+      --secondary-bg: #e0e0e0;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       padding: 2em;
-      background: #1e1e2f;
-      color: #f0f0f0;
+      background: var(--bg-color);
+      color: var(--text-color);
       text-align: center;
+      transition: background 0.3s, color 0.3s;
     }
     h1 { font-size: 2em; margin-bottom: 0.5em; }
-    p { margin-bottom: 1.5em; color: #ccc; }
+    p { margin-bottom: 1.5em; color: var(--text-color); }
     input {
       font-size: 1.2em;
       padding: 0.5em;
@@ -32,8 +47,8 @@
       border: none;
       border-radius: 6px;
       width: 200px;
-      background-color: #2e2e3e;
-      color: #f0f0f0;
+      background-color: var(--secondary-bg);
+      color: var(--text-color);
     }
     #rateInput {
       width: 120px;
@@ -45,11 +60,11 @@
       margin: 0.5em;
       border: none;
       border-radius: 6px;
-      background-color: #4c8bf5;
+      background-color: var(--accent-color);
       color: white;
       cursor: pointer;
     }
-    button:hover { background-color: #3a6edc; }
+    button:hover { background-color: var(--hover-color); }
     #result {
       margin-top: 2em;
       font-size: 1.4em;
@@ -70,7 +85,7 @@
     #feedback {
       margin-top: 1.2em;
       font-size: 1.2em;
-      color: #f0f0f0;
+      color: var(--text-color);
       opacity: 0;
       transition: opacity 0.4s ease;
     }
@@ -80,8 +95,8 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      background: #2a2a3a;
-      color: #ccc;
+      background: var(--secondary-bg);
+      color: var(--text-color);
       padding: 1em;
       box-shadow: 0 -2px 8px rgba(0,0,0,0.5);
       font-size: 0.9em;
@@ -93,7 +108,7 @@
     }
     .history-column { flex: 1; }
     .history-column h3, .history-column p {
-      color: #f0f0f0;
+      color: var(--text-color);
       text-align: center;
     }
     .history-column p {
@@ -105,9 +120,21 @@
       font-size: 0.9em;
       background-color: #ff5c5c;
     }
+    .top-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
   </style>
 </head>
 <body>
+  <div class="top-controls">
+    <button onclick="toggleTheme()">🌗 Змінити тему</button>
+    <button onclick="window.location.href='rate-calculator.html'">🧮 Розрахувати ставку</button>
+  </div>
   <h1>💰 Перевір скільки часу ти "платиш"</h1>
   <p>Ставка за годину: <input type="number" id="rateInput" value="0"> грн</p>
   <input type="number" id="amount" placeholder="Вартість у грн">
@@ -239,6 +266,19 @@
       document.getElementById('feedback').classList.remove('show');
     }
 
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+
+    function applySavedTheme() {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'light') {
+        document.body.classList.add('light');
+      }
+    }
+
+    applySavedTheme();
     loadRateFromStorage();
     updateHistory();
   </script>
