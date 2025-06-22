@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Розрахунок ставки</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e2f;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 2em;
+    }
+    input {
+      font-size: 1.2em;
+      padding: 0.5em;
+      margin: 0.5em;
+      border: none;
+      border-radius: 6px;
+      width: 200px;
+      background-color: #2a2a3a;
+      color: #f0f0f0;
+    }
+    button {
+      font-size: 1.1em;
+      padding: 0.6em 1.2em;
+      margin: 1em;
+      border: none;
+      border-radius: 6px;
+      background-color: #4c8bf5;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3a6edc;
+    }
+    #result {
+      font-size: 1.4em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Розрахунок ставки за годину</h1>
+  <p>Введіть свою зарплату, дні та кількість годин</p>
+  <input type="number" id="salary" placeholder="Зарплата (грн)">
+  <input type="number" id="days" placeholder="Дні">
+  <input type="number" id="hours" placeholder="Годин на день">
+  <br>
+  <button onclick="calculateRate()">Розрахувати</button>
+  <div id="result"></div>
+  <script>
+    function calculateRate() {
+      const salary = parseFloat(document.getElementById('salary').value);
+      const days = parseFloat(document.getElementById('days').value);
+      const hours = parseFloat(document.getElementById('hours').value);
+      const result = document.getElementById('result');
+
+      if (isNaN(salary) || isNaN(days) || isNaN(hours) || days <= 0 || hours <= 0) {
+        result.textContent = 'Введіть вірні дані';
+        return;
+      }
+
+      const totalHours = days * hours;
+      const rate = Math.round((salary / totalHours) * 100) / 100;
+      result.textContent = `Твоя ставка: ${rate} грн/год`;
+      localStorage.setItem('hourlyRate', rate);
+    }
+  </script>
+</body>
+</html>
