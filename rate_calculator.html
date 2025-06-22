@@ -39,6 +39,10 @@
       font-size: 1.4em;
       margin-top: 1em;
     }
+    #backBtn {
+      display: none;
+      background-color: #00c47c;
+    }
   </style>
 </head>
 <body>
@@ -50,15 +54,18 @@
   <br>
   <button onclick="calculateRate()">Розрахувати</button>
   <div id="result"></div>
+  <button id="backBtn" onclick="goBack()">⬅ Повернутись на головну</button>
   <script>
     function calculateRate() {
       const salary = parseFloat(document.getElementById('salary').value);
       const days = parseFloat(document.getElementById('days').value);
       const hours = parseFloat(document.getElementById('hours').value);
       const result = document.getElementById('result');
+      const backBtn = document.getElementById('backBtn');
 
       if (isNaN(salary) || isNaN(days) || isNaN(hours) || days <= 0 || hours <= 0) {
         result.textContent = 'Введіть вірні дані';
+        backBtn.style.display = 'none';
         return;
       }
 
@@ -66,6 +73,11 @@
       const rate = Math.round((salary / totalHours) * 100) / 100;
       result.textContent = `Твоя ставка: ${rate} грн/год`;
       localStorage.setItem('hourlyRate', rate);
+      backBtn.style.display = 'inline-block';
+    }
+
+    function goBack() {
+      window.location.href = 'index.html';
     }
   </script>
 </body>
