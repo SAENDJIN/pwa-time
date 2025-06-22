@@ -32,23 +32,33 @@
     }
     body {
       font-family: 'Segoe UI', sans-serif;
-      padding: 2em;
+      padding: 1em;
       background: var(--bg-color);
       color: var(--text-color);
       text-align: center;
       transition: background 0.3s, color 0.3s;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-    h1 { font-size: 2em; margin-bottom: 0.5em; }
-    p { margin-bottom: 1.5em; color: var(--text-color); }
+    .top-controls {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      margin-bottom: 1em;
+    }
+    h1 { font-size: 1.8em; margin-bottom: 0.5em; }
+    p { margin-bottom: 1em; color: var(--text-color); }
     input {
-      font-size: 1.2em;
+      font-size: 1.1em;
       padding: 0.5em;
-      margin: 0.5em;
+      margin: 0.3em;
       border: none;
       border-radius: 6px;
       width: 200px;
       background-color: var(--secondary-bg);
       color: var(--text-color);
+      box-sizing: border-box;
     }
     #rateInput {
       width: 120px;
@@ -57,7 +67,7 @@
     button {
       font-size: 1.1em;
       padding: 0.6em 1.2em;
-      margin: 0.5em;
+      margin: 0.3em;
       border: none;
       border-radius: 6px;
       background-color: var(--accent-color);
@@ -91,15 +101,12 @@
     }
     #feedback.show { opacity: 1; }
     #historyPanel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
       background: var(--secondary-bg);
       color: var(--text-color);
       padding: 1em;
       box-shadow: 0 -2px 8px rgba(0,0,0,0.5);
       font-size: 0.9em;
+      margin-top: 3em;
     }
     .history-columns {
       display: flex;
@@ -120,13 +127,30 @@
       font-size: 0.9em;
       background-color: #ff5c5c;
     }
-    .top-controls {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5em;
+
+    @media (max-width: 480px) {
+      .top-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      input {
+        width: 100%;
+      }
+
+      #rateInput {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .history-columns {
+        flex-direction: column;
+        gap: 1em;
+      }
     }
   </style>
 </head>
