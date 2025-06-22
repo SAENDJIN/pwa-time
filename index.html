@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -7,58 +6,65 @@
   <title>Скільки годин це коштує?</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e1e2f" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service worker зареєстровано'))
+          .catch(err => console.error('Service worker помилка:', err));
+      });
+    }
+  </script>
   <style>
+    :root {
+      --bg-color: #1e1e2f;
+      --text-color: #f0f0f0;
+      --accent-color: #4c8bf5;
+      --hover-color: #3a6edc;
+      --secondary-bg: #2a2a3a;
+    }
+    body.light {
+      --bg-color: #f0f0f0;
+      --text-color: #1e1e2f;
+      --accent-color: #007bff;
+      --hover-color: #0056b3;
+      --secondary-bg: #e0e0e0;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #1e1e2f;
-      color: #f0f0f0;
+      padding: 2em;
+      background: var(--bg-color);
+      color: var(--text-color);
       text-align: center;
-      margin: 0;
-      padding: 1em;
-      box-sizing: border-box;
+      transition: background 0.3s, color 0.3s;
     }
-    .top-buttons {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-      margin-bottom: 1em;
-    }
-    .top-buttons button {
-      font-size: 0.9em;
-      padding: 0.4em 0.8em;
-      border: none;
-      border-radius: 6px;
-      background-color: #4c8bf5;
-      color: white;
-      cursor: pointer;
-    }
-    .container {
-      max-width: 360px;
-      margin: 0 auto;
-      padding: 1em;
-    }
+    h1 { font-size: 2em; margin-bottom: 0.5em; }
+    p { margin-bottom: 1.5em; color: var(--text-color); }
     input {
       font-size: 1.2em;
       padding: 0.5em;
-      margin: 0.5em auto;
+      margin: 0.5em;
       border: none;
       border-radius: 6px;
-      width: 100%;
-      background-color: #2a2a3a;
-      color: #f0f0f0;
+      width: 200px;
+      background-color: var(--secondary-bg);
+      color: var(--text-color);
     }
-    button.action {
+    #rateInput {
+      width: 120px;
+      margin-left: 0.5em;
+    }
+    button {
       font-size: 1.1em;
       padding: 0.6em 1.2em;
-      margin: 0.5em auto;
+      margin: 0.5em;
       border: none;
       border-radius: 6px;
-      background-color: #4c8bf5;
+      background-color: var(--accent-color);
       color: white;
       cursor: pointer;
-      display: block;
     }
+    button:hover { background-color: var(--hover-color); }
     #result {
       margin-top: 2em;
       font-size: 1.4em;
@@ -72,59 +78,209 @@
       opacity: 1;
       transform: translateY(0);
     }
+    .button-group { margin-top: 1em; }
+    .choice-group { display: none; margin-top: 1.5em; }
+    .choice-group button { background-color: #5cc35c; }
+    .choice-group button.no { background-color: #ff5c5c; }
+    #feedback {
+      margin-top: 1.2em;
+      font-size: 1.2em;
+      color: var(--text-color);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #feedback.show { opacity: 1; }
+    #historyPanel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--secondary-bg);
+      color: var(--text-color);
+      padding: 1em;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.5);
+      font-size: 0.9em;
+    }
+    .history-columns {
+      display: flex;
+      justify-content: space-around;
+      gap: 1em;
+    }
+    .history-column { flex: 1; }
+    .history-column h3, .history-column p {
+      color: var(--text-color);
+      text-align: center;
+    }
+    .history-column p {
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    #clearHistoryBtn {
+      margin-top: 0.8em;
+      font-size: 0.9em;
+      background-color: #ff5c5c;
+    }
+    .top-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
   </style>
 </head>
 <body>
-  <div class="top-buttons">
+  <div class="top-controls">
     <button onclick="toggleTheme()">🌗 Змінити тему</button>
-    <button onclick="window.location.href='rate-calculator.html'">📅 Розрахувати ставку</button>
+    <button onclick="window.location.href='rate-calculator.html'">🧮 Розрахувати ставку</button>
   </div>
-  <div class="container">
-    <h1>💰 Перевір скільки часу ти “платиш”</h1>
-    <label>Ставка за годину:</label>
-    <input type="number" id="rateInput" placeholder="грн/год">
-    <input type="number" id="amount" placeholder="Вартість у грн">
-    <button class="action" onclick="calculateTime()">Розрахувати ⏱</button>
-    <button class="action" onclick="resetForm()">Скинути ♻</button>
-    <div id="result"></div>
+  <h1>💰 Перевір скільки часу ти "платиш"</h1>
+  <p>Ставка за годину: <input type="number" id="rateInput" value="0"> грн</p>
+  <input type="number" id="amount" placeholder="Вартість у грн">
+  <div class="button-group">
+    <button onclick="calculateTime()">Розрахувати ⏱</button>
+    <button onclick="resetForm()">Скинути 🔄</button>
   </div>
+  <div id="result"></div>
+  <div class="choice-group" id="choiceGroup">
+    <p>Ти купуєш це? 🤔</p>
+    <button onclick="recordDecision(true)">Так ✅</button>
+    <button class="no" onclick="recordDecision(false)">Ні ❌</button>
+  </div>
+  <div id="feedback"></div>
+  <div id="historyPanel">
+    <div class="history-columns">
+      <div class="history-column">
+        <h3>🛍 Витрачено</h3>
+        <p id="spentTotal">0 год 0 хв</p>
+      </div>
+      <div class="history-column">
+        <h3>🎉 Зекономлено</h3>
+        <p id="savedTotal">0 год 0 хв</p>
+      </div>
+    </div>
+    <button id="clearHistoryBtn" onclick="clearHistory()">Очистити історію 🧹</button>
+  </div>
+
   <script>
-    function toggleTheme() {
-      const current = localStorage.getItem('theme') || 'dark';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.body.style.background = next === 'dark' ? '#1e1e2f' : '#ffffff';
-      document.body.style.color = next === 'dark' ? '#f0f0f0' : '#000000';
-      localStorage.setItem('theme', next);
+    let savedTimeText = '';
+
+    function getRate() {
+      const rate = parseFloat(document.getElementById('rateInput').value);
+      return isNaN(rate) || rate <= 0 ? 744 : rate;
     }
 
-    const theme = localStorage.getItem('theme') || 'dark';
-    if (theme === 'light') toggleTheme();
+    function saveRateToStorage() {
+      const rate = document.getElementById('rateInput').value;
+      localStorage.setItem('hourlyRate', rate);
+    }
 
-    const rateInput = document.getElementById('rateInput');
-    rateInput.value = localStorage.getItem('hourlyRate') || '744';
+    function loadRateFromStorage() {
+      const savedRate = localStorage.getItem('hourlyRate');
+      if (savedRate) {
+        document.getElementById('rateInput').value = savedRate;
+      }
+    }
+
+    document.getElementById('rateInput').addEventListener('change', saveRateToStorage);
+
+    function parseTime(text) {
+      const match = text.match(/(?:(\d+) дн )?(\d+) год (\d+) хв/);
+      const days = parseInt(match[1] || '0', 10);
+      const hours = parseInt(match[2], 10);
+      const minutes = parseInt(match[3], 10);
+      return days * 1440 + hours * 60 + minutes;
+    }
+
+    function formatMinutes(totalMinutes) {
+      const days = Math.floor(totalMinutes / 1440);
+      const hours = Math.floor((totalMinutes % 1440) / 60);
+      const minutes = totalMinutes % 60;
+      return `${days > 0 ? days + ' дн ' : ''}${hours} год ${minutes} хв`;
+    }
 
     function calculateTime() {
-      const rate = parseFloat(rateInput.value);
       const amount = parseFloat(document.getElementById('amount').value);
       const result = document.getElementById('result');
-      if (isNaN(rate) || isNaN(amount) || rate <= 0 || amount <= 0) {
-        result.textContent = 'Введи коректні дані';
+      const choiceGroup = document.getElementById('choiceGroup');
+      const feedback = document.getElementById('feedback');
+
+      const ratePerHour = getRate();
+
+      if (isNaN(amount) || amount <= 0) {
+        result.textContent = 'Введи коректну суму';
         result.classList.add('show');
+        choiceGroup.style.display = 'none';
+        feedback.textContent = '';
+        feedback.classList.remove('show');
         return;
       }
-      const minutes = Math.round((amount / rate) * 60);
-      const d = Math.floor(minutes / 1440);
-      const h = Math.floor((minutes % 1440) / 60);
-      const m = minutes % 60;
-      result.textContent = `Це коштує тобі: ${d ? d + ' дн ' : ''}${h} год ${m} хв`;
+
+      const totalMinutes = Math.round((amount / ratePerHour) * 60);
+      savedTimeText = formatMinutes(totalMinutes);
+
+      result.textContent = `Це коштує тобі: ${savedTimeText}`;
       result.classList.add('show');
+      choiceGroup.style.display = 'block';
+      feedback.textContent = '';
+      feedback.classList.remove('show');
+    }
+
+    function recordDecision(didBuy) {
+      const feedback = document.getElementById('feedback');
+      const type = didBuy ? 'spent' : 'saved';
+      const entry = savedTimeText;
+      feedback.textContent = `${didBuy ? '🛍 Ти витратив(ла)' : '🎉 Ти зекономив(ла)'}: ${entry}`;
+      feedback.classList.add('show');
+
+      const data = JSON.parse(localStorage.getItem('timeHistoryV2')) || { spent: [], saved: [] };
+      data[type].unshift(entry);
+      localStorage.setItem('timeHistoryV2', JSON.stringify(data));
+      updateHistory();
+    }
+
+    function updateHistory() {
+      const data = JSON.parse(localStorage.getItem('timeHistoryV2')) || { spent: [], saved: [] };
+      let spentMinutes = 0;
+      let savedMinutes = 0;
+
+      data.spent.forEach(item => spentMinutes += parseTime(item));
+      data.saved.forEach(item => savedMinutes += parseTime(item));
+
+      document.getElementById('spentTotal').textContent = formatMinutes(spentMinutes);
+      document.getElementById('savedTotal').textContent = formatMinutes(savedMinutes);
+    }
+
+    function clearHistory() {
+      localStorage.removeItem('timeHistoryV2');
+      updateHistory();
     }
 
     function resetForm() {
       document.getElementById('amount').value = '';
       document.getElementById('result').textContent = '';
       document.getElementById('result').classList.remove('show');
+      document.getElementById('choiceGroup').style.display = 'none';
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('feedback').classList.remove('show');
     }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+
+    function applySavedTheme() {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'light') {
+        document.body.classList.add('light');
+      }
+    }
+
+    applySavedTheme();
+    loadRateFromStorage();
+    updateHistory();
   </script>
 </body>
 </html>
